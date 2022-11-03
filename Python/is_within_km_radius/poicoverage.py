@@ -29,6 +29,7 @@
 from math import radians, cos, sin, asin, sqrt
 import json
 
+# haversine from https://stackoverflow.com/questions/42686300/how-to-check-if-coordinate-inside-certain-area-python
 def haversine(lon1, lat1, lon2, lat2):
     """
     Calculate the great circle distance between two points 
