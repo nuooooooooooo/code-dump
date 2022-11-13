@@ -1,31 +1,3 @@
-# one json contains the poi
-
-# one json contains the panels
-
-#pseudocode:
-
-# for each POI
-
-# for each panel
-
-# islessthan5kmaway ?
-# YES : count, then islessthan3kmaway ? YES : count
-# NO : continue
-
-# return dict that converted to json looks like
-# {
-#     POI_NAME:  {
-#         lessthan5km: 0
-#         lessthan3KM: 0
-#     }
-#     POI_NAME:  {
-#         lessthan5km: 0
-#         lessthan3KM: 0
-#     }
-# }
-
-# ACOS(SIN(RADIANS(LAT_POI))*SIN(RADIANS(LAT_PAN))+COS(RADIANS(LAT_POI))*COS(RADIANS(LAT_PAN))*COS(RADIANS(LONG_POI-LONG_PAN)))*6371
-
 from math import radians, cos, sin, asin, sqrt
 import json
 
@@ -46,23 +18,6 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
     return c * r
 
-center_point = [{'lat': -7.7940023, 'lng': 110.3656535}]
-test_point = [{'lat': -7.79457, 'lng': 110.36563}]
-
-lat1 = center_point[0]['lat']
-lon1 = center_point[0]['lng']
-lat2 = test_point[0]['lat']
-lon2 = test_point[0]['lng']
-
-radius = 1.00 # in kilometer
-
-a = haversine(lon1, lat1, lon2, lat2)
-
-print('Distance (km) : ', a)
-if a <= radius:
-    print('Inside the area')
-else:
-    print('Outside the area')
 
 f = open('poi.json')
 f2 = open('panelsSF.json')
@@ -82,6 +37,32 @@ def is_in_dist_of_POI(POI, panels, radius,d):
                 d[poi_loc] = {}
             if dist <= radius:
                 d[poi_loc][f'within_{radius}km'] = d[poi_loc].get(f'within_{radius}km',0)+1
+    return d
+
+def panel_in_dist_of_POI(POI, panels, radius,d):
+  for panel_ref, panel_coords in panels.items():
+    for poi_loc, poi_coords in POI.items():
+        dist = haversine(poi_coords['Longitude'], poi_coords['Latitude'], panel_coords['Longitude'], panel_coords['Latitude'])
+        if panel_ref not in d:
+                d[panel_ref] = {}
+        if dist <= radius:
+          d[panel_ref][f"Covers POI within {radius} km"] = True
+          print(panel_ref)
+          break
+        else:
+          d[panel_ref][f"Covers POI within {radius} km"] = False
+  return d
+
+def list_in_dist_of_POI(POI, panels, radius,d):
+    for poi_loc, poi_coords in POI.items():
+      lst = list()
+      for panel_loc, panel_coords in panels.items():
+          dist = haversine(poi_coords['Longitude'], poi_coords['Latitude'], panel_coords['Longitude'], panel_coords['Latitude'])
+          if poi_loc not in d:
+              d[poi_loc] = {}
+          if dist <= radius:
+              lst.append(panel_loc)
+              d[poi_loc][f'within_{radius}km'] = lst
     return d
                 
 
